@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק טריוויה</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            direction: rtl;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff5f7; /* Light pink background */
+            color: #4a4a4a;
+        }
+
+        h1 {
+            color: #d81b60; /* Pink heading */
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        button {
+            padding: 12px 25px;
+            margin: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #fff;
+            border: 2px solid #ff80ab; /* Light pink border */
+            border-radius: 25px; /* Rounded corners */
+            color: #d81b60;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ff80ab;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .correct {
+            background-color: #81c784; /* Softer green */
+            color: white;
+            border-color: #81c784;
+        }
+
+        .incorrect {
+            background-color: #e57373; /* Softer red */
+            color: white;
+            border-color: #e57373;
+        }
+
+        #result {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 15px;
+        }
+
+        #question {
+            font-size: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        #score {
+            font-size: 24px;
+            color: #d81b60;
+            font-weight: bold;
+        }
+
+        #choices {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>✨ משחק טריוויה ✨</h1>
+    <p id="question"></p>
+    <div id="choices"></div>
+    <p id="result"></p>
+    <p>ניקוד: <span id="score">0</span></p>
+
+    <script>
+        const questions = [
+            {
+                question: "מה ביאור המילה דודי בפיוט לכה דודי?",
+                choices: ["שמור", "זכור", "מלכה", "חתן"],
+                correctAnswer: "חתן"
+            },
+            {
+                question: "(הקדמה לשבת) מה מוזכר בתפילת שבת",
+                choices: ["שבת בבריאת העולם", "להתלבש חגיגי", "זכר ליציאת מצרים", "תשובות א' וג' נכונות"],
+                correctAnswer: "תשובות א' וג' נכונות"
+            },
+            {
+                question: "מה ההבדל בין לשמור את השבת ללעשות?",
+                choices: [
+                    "אין הבדל ביניהם",
+                    "לשמור זה ההלכות האסורות ולעשות זה הדברים שאנחנו עושים בשבת",
+                    "לשמור הדברים שאנחנו עושים בשבת לעשות ההלכות האסורות",
+                    "לשמור זה עונג שבת לעשות משמעות של שבת"
+                ],
+                correctAnswer: "לשמור זה ההלכות האסורות ולעשות זה הדברים שאנחנו עושים בשבת"
+            },
+            {
+                question: "מהם בגדי תפארתך (לכה דודי)?",
+                choices: ["בגדי שלובשים בשבת", "צניעות", "המצוות שהאדם מקיים ביום יום", "הכנה לביאת משיח"],
+                correctAnswer: "בגדי שלובשים בשבת"
+            },
+            {
+                question: "מה הפייטן מבטיח על ירושלים?",
+                choices: ["שנצא לגלות ארוכת שנים", "שנשוב לירושלים מכל קצוות תבל", "שהיא עיר הקודש", "לא מבטיח"],
+                correctAnswer: "שנשוב לירושלים מכל קצוות תבל"
+            },
+            {
+                question: "מה סופם של הרשעים שפורחים 'כמו עשב'?",
+                choices: ["הם יצליחו ויגדלו", "לא יקרה להם כלום", "בהתחלה יכשלו ואחרי זה יצליחו", "בהתחלה יצליחו ואחרי זה יפלו"],
+                correctAnswer: "בהתחלה יצליחו ואחרי זה יפלו"
+            },
+            {
+                question: "לאילו עצים נמשלו הצדיקים?",
+                choices: ["עץ תמר עץ ארז", "עצי פרי", "שיח ועץ אלון", "לא נמשלו לעצים"],
+                correctAnswer: "עץ תמר עץ ארז"
+            },
+            {
+                question: "מהו היחס של צדיק לעומת בני האדם?",
+                choices: [
+                    "הצדיק יותר חכם מאדם הפשוט",
+                    "הצדיק יש בו רוח הקודש ולכן היחס שונה",
+                    "הצדיק אין בו רע והוא אדם קדוש והאדם הפשוט עדין לא הגיע לשם",
+                    "תשובות ב' וג' נכונות"
+                ],
+                correctAnswer: "הצדיק אין בו רע והוא אדם קדוש והאדם הפשוט עדין לא הגיע לשם"
+            },
+            {
+                question: "במה שונה תפילת העמידה של שבת מתפילה ביום חול?",
+                choices: [
+                    "אין הבדל",
+                    "ביום חול יש בקשות ותחנונים בשבת אין",
+                    "ביום חול יש 19 ברכות בשבת יש 7",
+                    "תשובות ב' וג' נכונות"
+                ],
+                correctAnswer: "תשובות ב' וג' נכונות"
+            },
+            {
+                question: "מתי הקב\"ה ברך את השבת?",
+                choices: [
+                    "מיד בתחילת בריאת העולם",
+                    "בהר סיני",
+                    "ביצית מצרים",
+                    "ביום השביעי לבריאת העולם"
+                ],
+                correctAnswer: "ביום השביעי לבריאת העולם"
+            },
+            {
+                question: "\"התנערי מעפר קומי\" מה המשל שמשתמש הפייטן?",
+                choices: [
+                    "כאדם חלש מאוד",
+                    "כאדם שהושפל מאוד",
+                    "כאדם שלובש עפר"
+                ],
+                correctAnswer: "כאדם שהושפל מאוד"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function displayQuestion() {
+            if (currentQuestion < questions.length) {
+                const question = questions[currentQuestion];
+                document.getElementById('question').textContent = question.question;
+                
+                const choicesDiv = document.getElementById('choices');
+                choicesDiv.innerHTML = '';
+                
+                question.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice;
+                    button.onclick = () => checkAnswer(choice);
+                    choicesDiv.appendChild(button);
+                });
+                
+                document.getElementById('result').textContent = '';
+            } else {
+                document.getElementById('question').textContent = 'המשחק נגמר!';
+                document.getElementById('choices').innerHTML = '';
+                document.getElementById('result').textContent = `ציון סופי: ${score} מתוך ${questions.length}`;
+            }
+        }
+
+        function checkAnswer(choice) {
+            const correct = choice === questions[currentQuestion].correctAnswer;
+            
+            if (correct) {
+                score++;
+                document.getElementById('result').textContent = 'נכון!';
+                document.getElementById('score').textContent = score;
+            } else {
+                document.getElementById('result').textContent = 'לא נכון!';
+            }
+
+            const buttons = document.getElementById('choices').getElementsByTagName('button');
+            for (let button of buttons) {
+                if (button.textContent === questions[currentQuestion].correctAnswer) {
+                    button.classList.add('correct');
+                } else if (button.textContent === choice && !correct) {
+                    button.classList.add('incorrect');
+                }
+                button.disabled = true;
+            }
+
+            setTimeout(() => {
+                currentQuestion++;
+                displayQuestion();
+            }, 1500);
+        }
+
+        // Start the game immediately
+        displayQuestion();
+    </script>
+</body>
+</html>
