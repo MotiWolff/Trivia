@@ -97,6 +97,10 @@
     <div id="choices"></div>
     <p id="result"></p>
     <p>ניקוד: <span id="score">0</span></p>
+    <div>
+        <button id="prevButton" onclick="previousQuestion()">שאלה קודמת</button>
+        <button id="nextButton" onclick="nextQuestion()">שאלה הבאה</button>
+    </div>
 
     <script>
         const questions = [
@@ -204,6 +208,8 @@
 
         let currentQuestion = 0;
         let score = 0;
+        let answeredQuestions = new Array(questions.length).fill(false);
+        let userAnswers = new Array(questions.length).fill(null);
 
         function displayQuestion() {
             if (currentQuestion < questions.length) {
@@ -217,10 +223,21 @@
                     const button = document.createElement('button');
                     button.textContent = choice;
                     button.onclick = () => checkAnswer(choice);
+                    
+                    if (answeredQuestions[currentQuestion]) {
+                        button.disabled = true;
+                        if (choice === questions[currentQuestion].correctAnswer) {
+                            button.classList.add('correct');
+                        } else if (choice === userAnswers[currentQuestion]) {
+                            button.classList.add('incorrect');
+                        }
+                    }
+                    
                     choicesDiv.appendChild(button);
                 });
                 
                 document.getElementById('result').textContent = '';
+                updateNavigationButtons();
             } else {
                 document.getElementById('question').textContent = 'המשחק נגמר!';
                 document.getElementById('choices').innerHTML = '';
@@ -229,7 +246,11 @@
         }
 
         function checkAnswer(choice) {
+            if (answeredQuestions[currentQuestion]) return;
+            
             const correct = choice === questions[currentQuestion].correctAnswer;
+            userAnswers[currentQuestion] = choice;
+            answeredQuestions[currentQuestion] = true;
             
             if (correct) {
                 score++;
@@ -248,13 +269,28 @@
                 }
                 button.disabled = true;
             }
-
-            setTimeout(() => {
-                currentQuestion++;
-                displayQuestion();
-            }, 1500);
         }
 
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prevButton').disabled = currentQuestion === 0;
+            document.getElementById('nextButton').disabled = currentQuestion === questions.length - 1;
+        }
+
+        // Remove the automatic progression
         // Start the game immediately
         displayQuestion();
     </script>
